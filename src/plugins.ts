@@ -12,6 +12,7 @@ export const plugins = new Elysia()
     jwt({
       name: 'jwt',
       secret: Bun.env.SECRET as string,
+      exp: '7d',
     }),
   )
   .use(bearer())
@@ -23,9 +24,6 @@ export const plugins = new Elysia()
         const tag = url.split('/').at(0)!
 
         return {
-          beforeHandle: ({ request }) => {
-            console.log(request.url)
-          },
           detail: {
             description: `Route autoloaded from ${path}`,
             tags: [`${tag.charAt(0).toUpperCase()}${tag.slice(1)}`],

@@ -1,3 +1,3 @@
 import type { ElysiaApp } from '@/.'
 
-export default (app: ElysiaApp) => app.get('/', () => 'Hello Elysia')
+export default (app: ElysiaApp) => app.get('/', 'Hello Elysia')
