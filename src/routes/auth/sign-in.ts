@@ -7,11 +7,16 @@ import { t } from 'elysia'
 const schema = {
   body: t.Pick(selectUserSchema, ['username', 'password']),
   response: {
-    200: t.Object({
-      token: t.String(),
-    }),
-    401: t.String(),
-    404: t.String(),
+    200: t.Object(
+      {
+        token: t.String({ examples: ['abcdefghijklmnopqrstuvwxyz'] }),
+      },
+      {
+        description: 'OK',
+      },
+    ),
+    401: t.String({ examples: ['Unauthorized'], description: 'Unauthorized' }),
+    404: t.String({ examples: ['Not Found'], description: 'Not Found' }),
   },
 }
 

@@ -7,8 +7,8 @@ import { t } from 'elysia'
 const schema = {
   body: t.Pick(insertUserSchema, ['username', 'password']),
   response: {
-    201: t.Undefined(),
-    409: t.String(),
+    201: t.Undefined({ description: 'Created' }),
+    409: t.String({ examples: ['Conflict'], description: 'Conflict' }),
   },
 }
 
