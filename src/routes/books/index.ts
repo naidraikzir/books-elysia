@@ -1,7 +1,7 @@
 import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
-import { storeImage } from '@/libs/storeFiles'
+import { storeImage } from '@/lib/storeFiles'
 import {
   books,
   insertBookSchema,
@@ -27,7 +27,13 @@ export default (app: ElysiaApp) =>
     )
     .post(
       '',
-      async ({ set, body }) => {
+      async ({ set, cookie: { accessToken }, jwt, body }) => {
+        const profile = await jwt.verify(accessToken.value)
+        if (!profile) {
+          set.status = 401
+          return 'Unauthorized'
+        }
+
         const { name, author, cover } = body
         const id = crypto.randomUUID()
         const coverFilename = await storeImage(cover as Blob)
@@ -69,6 +75,7 @@ export default (app: ElysiaApp) =>
               },
             },
           }),
+          401: t.String(),
         },
       },
     )

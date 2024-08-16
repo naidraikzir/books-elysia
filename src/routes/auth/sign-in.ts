@@ -1,4 +1,5 @@
 import type { ElysiaApp } from '@/.'
+import { ACCESS_TOKEN_EXP } from '@/constants'
 import { db } from '@/db'
 import { selectUserSchema, users } from '@/schemas/users.schema'
 import { eq } from 'drizzle-orm'
@@ -7,14 +8,9 @@ import { t } from 'elysia'
 const schema = {
   body: t.Pick(selectUserSchema, ['username', 'password']),
   response: {
-    200: t.Object(
-      {
-        token: t.String({ examples: ['abcdefghijklmnopqrstuvwxyz'] }),
-      },
-      {
-        description: 'OK',
-      },
-    ),
+    200: t.Object({
+      accessToken: t.String(),
+    }),
     401: t.String({ examples: ['Unauthorized'], description: 'Unauthorized' }),
     404: t.String({ examples: ['Not Found'], description: 'Not Found' }),
   },
@@ -23,7 +19,7 @@ const schema = {
 export default (app: ElysiaApp) =>
   app.post(
     '',
-    async ({ set, body, jwt }) => {
+    async ({ set, jwt, cookie: { accessToken }, body }) => {
       const user = (
         await db.select().from(users).where(eq(users.username, body.username))
       ).at(0)
@@ -43,12 +39,20 @@ export default (app: ElysiaApp) =>
         return 'Wrong password buddy!'
       }
 
-      const token = await jwt.sign({
-        name: user.username,
-        iat: Math.round(new Date().getTime() / 1000),
+      accessToken.set({
+        value: await jwt.sign({
+          sub: user.id,
+          name: user.username,
+          iat: Math.round(new Date().getTime() / 1000),
+        }),
+        httpOnly: true,
+        maxAge: ACCESS_TOKEN_EXP,
+        path: '/',
       })
 
-      return { token }
+      return {
+        accessToken: accessToken.value as string,
+      }
     },
     schema,
   )
