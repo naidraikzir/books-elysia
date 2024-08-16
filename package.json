@@ -20,7 +20,8 @@
     "drizzle-orm": "^0.33.0",
     "drizzle-typebox": "^0.1.1",
     "elysia": "latest",
-    "elysia-autoload": "^1.1.0"
+    "elysia-autoload": "^1.1.0",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
