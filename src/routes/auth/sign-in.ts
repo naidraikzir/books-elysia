@@ -9,10 +9,10 @@ const schema = {
   body: t.Pick(selectUserSchema, ['username', 'password']),
   response: {
     200: t.Object({
-      accessToken: t.String(),
+      accessToken: t.String({ default: 'abcdefghijklmnopqrstuvwxyz' }),
     }),
-    401: t.String({ examples: ['Unauthorized'], description: 'Unauthorized' }),
-    404: t.String({ examples: ['Not Found'], description: 'Not Found' }),
+    401: t.String({ default: 'Unauthorized', description: 'Unauthorized' }),
+    404: t.String({ default: 'Not Found', description: 'Not Found' }),
   },
 }
 
