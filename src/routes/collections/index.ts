@@ -1,8 +1,9 @@
 import type { ElysiaApp } from '@/.'
-import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
-import { storeImage } from '@/lib/files'
-import { books, insertBookSchema } from '@/schemas/books.schema'
+import {
+  collections,
+  insertCollectionSchema,
+} from '@/schemas/collections.schema'
 import { desc } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -12,33 +13,27 @@ export default (app: ElysiaApp) =>
     .get(
       '',
       async () => {
-        const bookList = await db
+        const collectionList = await db
           .select()
-          .from(books)
-          .orderBy(desc(books.timestamp))
-        return bookList
+          .from(collections)
+          .orderBy(desc(collections.timestamp))
+        return collectionList
       },
       {
-        query: t.Object({
-          page: t.Optional(t.Integer()),
-          limit: t.Optional(t.Integer()),
-        }),
         response: {
           200: t.Array(
             t.Object(
               {
                 id: t.String(),
                 name: t.Union([t.Null(), t.String()]),
-                author: t.Union([t.Null(), t.String()]),
-                cover: t.Union([t.Null(), t.String()]),
+                userId: t.Union([t.Null(), t.String()]),
                 timestamp: t.Union([t.Null(), t.String()]),
               },
               {
                 default: {
                   id: '00000000-0000-0000-0000-000000000000',
                   name: 'name',
-                  author: 'author',
-                  cover: 'cover.webp',
+                  userId: '00000000-0000-0000-0000-000000000000',
                   timestamp: '2000-01-01 00:00:00',
                 },
               },
@@ -60,16 +55,15 @@ export default (app: ElysiaApp) =>
           return 'Unauthorized'
         }
 
-        const { name, author, cover } = body
+        const { sub: userId } = profile
+        const { name } = body
         const id = crypto.randomUUID()
-        const coverFilename = await storeImage(cover as Blob)
         const [inserted] = await db
-          .insert(books)
+          .insert(collections)
           .values({
             id,
             name,
-            author,
-            cover: coverFilename,
+            userId,
           })
           .returning()
 
@@ -78,24 +72,16 @@ export default (app: ElysiaApp) =>
       },
       {
         type: 'multipart/form-data',
-        body: t.Composite([
-          t.Pick(insertBookSchema, ['name', 'author']),
-          t.Object({
-            cover: t.Optional(
-              t.File({
-                type: FILETYPES.image,
-                maxSize: MAX_FILESIZE,
-              }),
-            ),
-          }),
-        ]),
+        body: t.Composite([t.Pick(insertCollectionSchema, ['name'])]),
         response: {
           201: t.Object(
             {
               id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
               name: t.Union([t.Null(), t.String({ default: 'name' })]),
-              author: t.Union([t.Null(), t.String({ default: 'author' })]),
-              cover: t.Union([t.Null(), t.String({ default: 'cover.webp' })]),
+              userId: t.Union([
+                t.Null(),
+                t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              ]),
               timestamp: t.Union([
                 t.Null(),
                 t.String({ default: '2000-01-01 00:00:00' }),

@@ -1,8 +1,9 @@
 import type { ElysiaApp } from '@/.'
-import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
-import { deleteImage, storeImage } from '@/lib/files'
-import { books, insertBookSchema } from '@/schemas/books.schema'
+import {
+  collections,
+  insertCollectionSchema,
+} from '@/schemas/collections.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -12,14 +13,17 @@ export default (app: ElysiaApp) =>
     .get(
       '',
       async ({ set, params: { id } }) => {
-        const [book] = await db.select().from(books).where(eq(books.id, id))
+        const [collection] = await db
+          .select()
+          .from(collections)
+          .where(eq(collections.id, id))
 
-        if (!book) {
+        if (!collection) {
           set.status = 404
           return 'Not Found'
         }
 
-        return book
+        return collection
       },
       {
         params: t.Object({
@@ -30,8 +34,9 @@ export default (app: ElysiaApp) =>
             {
               id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
-              author: t.Union([t.Null(), t.String()], { default: 'author' }),
-              cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),
+              userId: t.Union([t.Null(), t.String()], {
+                default: '00000000-0000-0000-0000-000000000000',
+              }),
               timestamp: t.Union([t.Null(), t.String()], {
                 default: '2000-01-01 00:00:00',
               }),
@@ -54,26 +59,30 @@ export default (app: ElysiaApp) =>
           return 'Unauthorized'
         }
 
-        const [exist] = await db.select().from(books).where(eq(books.id, id))
+        const [exist] = await db
+          .select()
+          .from(collections)
+          .where(eq(collections.id, id))
 
         if (!exist) {
           set.status = 404
           return 'Not Found'
         }
 
-        const { name, author, cover } = body
-        const coverFilename = await storeImage(cover as Blob)
+        if (exist && exist.userId !== profile.sub) {
+          set.status = 401
+          return 'Unauthorized'
+        }
+
+        const { name } = body
         const [updated] = await db
-          .update(books)
+          .update(collections)
           .set({
             name: name as string,
-            author: author as string,
-            cover: coverFilename,
           })
-          .where(eq(books.id, id))
+          .where(eq(collections.id, id))
           .returning()
 
-        deleteImage(exist?.cover)
         return updated
       },
       {
@@ -81,24 +90,15 @@ export default (app: ElysiaApp) =>
         params: t.Object({
           id: t.String(),
         }),
-        body: t.Composite([
-          t.Pick(insertBookSchema, ['name', 'author']),
-          t.Object({
-            cover: t.Optional(
-              t.File({
-                type: FILETYPES.image,
-                maxSize: MAX_FILESIZE,
-              }),
-            ),
-          }),
-        ]),
+        body: t.Composite([t.Pick(insertCollectionSchema, ['name'])]),
         response: {
           200: t.Object(
             {
               id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
-              author: t.Union([t.Null(), t.String()], { default: 'author' }),
-              cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),
+              userId: t.Union([t.Null(), t.String()], {
+                default: '00000000-0000-0000-0000-000000000000',
+              }),
               timestamp: t.Union([t.Null(), t.String()], {
                 default: '2000-01-01 00:00:00',
               }),
@@ -125,19 +125,26 @@ export default (app: ElysiaApp) =>
           return 'Unauthorized'
         }
 
-        const [exist] = await db.select().from(books).where(eq(books.id, id))
+        const [exist] = await db
+          .select()
+          .from(collections)
+          .where(eq(collections.id, id))
 
         if (!exist) {
           set.status = 404
           return 'Not Found'
         }
 
+        if (exist && exist.userId !== profile.sub) {
+          set.status = 401
+          return 'Unauthorized'
+        }
+
         const [deleted] = await db
-          .delete(books)
-          .where(eq(books.id, id))
+          .delete(collections)
+          .where(eq(collections.id, id))
           .returning()
 
-        deleteImage(deleted?.cover)
         return deleted
       },
       {
@@ -149,8 +156,9 @@ export default (app: ElysiaApp) =>
             {
               id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
-              author: t.Union([t.Null(), t.String()], { default: 'author' }),
-              cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),
+              userId: t.Union([t.Null(), t.String()], {
+                default: '00000000-0000-0000-0000-000000000000',
+              }),
               timestamp: t.Union([t.Null(), t.String()], {
                 default: '2000-01-01 00:00:00',
               }),
