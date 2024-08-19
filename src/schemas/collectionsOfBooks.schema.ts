@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm'
 import { primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'
 import { books } from './books.schema'
 import { collections } from './collections.schema'
 
@@ -17,6 +18,13 @@ export const collectionsOfBooks = sqliteTable(
     pk: primaryKey({ columns: [t.collectionId, t.bookId] }),
   }),
 )
+
+export type CollectionOfBooks = typeof collectionsOfBooks.$inferSelect
+
+export const insertCollectionOfBooksSchema =
+  createInsertSchema(collectionsOfBooks)
+export const selectCollectionOfBooksSchema =
+  createSelectSchema(collectionsOfBooks)
 
 export const collectionsOfBooksRelations = relations(
   collectionsOfBooks,
