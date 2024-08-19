@@ -1,7 +1,7 @@
 import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
-import { storeImage } from '@/lib/storeFiles'
+import { storeImage } from '@/lib/files'
 import {
   books,
   insertBookSchema,
