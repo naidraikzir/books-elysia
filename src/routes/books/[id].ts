@@ -2,6 +2,7 @@ import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { deleteImage, storeImage } from '@/lib/files'
+import { jwtHandler } from '@/middlewares/jwt'
 import { books, insertBookSchema } from '@/schemas/books.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
@@ -12,7 +13,9 @@ export default (app: ElysiaApp) =>
     .get(
       '',
       async ({ set, params: { id } }) => {
-        const [book] = await db.select().from(books).where(eq(books.id, id))
+        const book = await db.query.books.findFirst({
+          where: eq(books.id, id),
+        })
 
         if (!book) {
           set.status = 404
@@ -45,16 +48,14 @@ export default (app: ElysiaApp) =>
       },
     )
 
+    .use(jwtHandler)
+
     .put(
       '',
-      async ({ set, jwt, cookie: { accessToken }, params: { id }, body }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
-
-        const [exist] = await db.select().from(books).where(eq(books.id, id))
+      async ({ set, params: { id }, body }) => {
+        const exist = await db.query.books.findFirst({
+          where: eq(books.id, id),
+        })
 
         if (!exist) {
           set.status = 404
@@ -117,14 +118,10 @@ export default (app: ElysiaApp) =>
 
     .delete(
       '',
-      async ({ set, jwt, cookie: { accessToken }, params: { id } }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
-
-        const [exist] = await db.select().from(books).where(eq(books.id, id))
+      async ({ set, params: { id } }) => {
+        const exist = await db.query.books.findFirst({
+          where: eq(books.id, id),
+        })
 
         if (!exist) {
           set.status = 404

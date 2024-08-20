@@ -1,22 +1,27 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
+import { jwtHandler } from '@/middlewares/jwt'
 import {
   collections,
   insertCollectionSchema,
 } from '@/schemas/collections.schema'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
 export default (app: ElysiaApp) =>
   app
 
+    .use(jwtHandler)
+
     .get(
       '',
-      async () => {
-        const collectionList = await db
-          .select()
-          .from(collections)
-          .orderBy(desc(collections.timestamp))
+      async ({ profile }) => {
+        const { sub: userId } = profile
+        const collectionList = await db.query.collections.findMany({
+          where: eq(collections.userId, userId as string),
+          orderBy: desc(collections.timestamp),
+        })
+
         return collectionList
       },
       {
@@ -42,19 +47,14 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
+          401: t.String({ default: 'Unauthorized' }),
         },
       },
     )
 
     .post(
       '',
-      async ({ set, cookie: { accessToken }, jwt, body }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
-
+      async ({ profile, set, body }) => {
         const { sub: userId } = profile
         const { name } = body
         const id = crypto.randomUUID()

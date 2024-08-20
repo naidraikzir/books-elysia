@@ -2,11 +2,8 @@ import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { storeImage } from '@/lib/files'
-import {
-  books,
-  insertBookSchema,
-  selectBookSchema,
-} from '@/schemas/books.schema'
+import { jwtHandler } from '@/middlewares/jwt'
+import { books, insertBookSchema } from '@/schemas/books.schema'
 import { desc } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -16,10 +13,10 @@ export default (app: ElysiaApp) =>
     .get(
       '',
       async () => {
-        const bookList = await db
-          .select()
-          .from(books)
-          .orderBy(desc(books.timestamp))
+        const bookList = await db.query.books.findMany({
+          orderBy: desc(books.timestamp),
+        })
+
         return bookList
       },
       {
@@ -55,15 +52,11 @@ export default (app: ElysiaApp) =>
       },
     )
 
+    .use(jwtHandler)
+
     .post(
       '',
-      async ({ set, cookie: { accessToken }, jwt, body }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
-
+      async ({ set, body }) => {
         const { name, author, cover } = body
         const id = crypto.randomUUID()
         const coverFilename = await storeImage(cover as Blob)

@@ -9,9 +9,9 @@ export default (app: ElysiaApp) =>
   app.post(
     '',
     async ({ set, jwt, cookie: { accessToken }, body }) => {
-      const user = (
-        await db.select().from(users).where(eq(users.username, body.username))
-      ).at(0)
+      const user = await db.query.users.findFirst({
+        where: eq(users.username, body.username),
+      })
 
       if (!user) {
         set.status = 404

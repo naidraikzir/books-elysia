@@ -1,22 +1,29 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
+import { jwtHandler } from '@/middlewares/jwt'
 import {
   collections,
   insertCollectionSchema,
 } from '@/schemas/collections.schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
 export default (app: ElysiaApp) =>
   app
 
+    .use(jwtHandler)
+
     .get(
       '',
-      async ({ set, params: { id } }) => {
-        const [collection] = await db
-          .select()
-          .from(collections)
-          .where(eq(collections.id, id))
+      async ({ profile, set, params: { id } }) => {
+        const { sub: userId } = profile
+
+        const collection = await db.query.collections.findFirst({
+          where: and(
+            eq(collections.id, id),
+            eq(collections.userId, userId as string),
+          ),
+        })
 
         if (!collection) {
           set.status = 404
@@ -52,24 +59,22 @@ export default (app: ElysiaApp) =>
 
     .put(
       '',
-      async ({ set, jwt, cookie: { accessToken }, params: { id }, body }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
+      async ({ set, profile, params: { id }, body }) => {
+        const { sub: userId } = profile
 
-        const [exist] = await db
-          .select()
-          .from(collections)
-          .where(eq(collections.id, id))
+        const exist = await db.query.collections.findFirst({
+          where: and(
+            eq(collections.id, id),
+            eq(collections.userId, userId as string),
+          ),
+        })
 
         if (!exist) {
           set.status = 404
           return 'Not Found'
         }
 
-        if (exist && exist.userId !== profile.sub) {
+        if (exist && exist.userId !== userId) {
           set.status = 401
           return 'Unauthorized'
         }
@@ -117,24 +122,19 @@ export default (app: ElysiaApp) =>
 
     .delete(
       '',
-      async ({ set, jwt, cookie: { accessToken }, params: { id } }) => {
-        const profile = await jwt.verify(accessToken.value)
-        if (!profile) {
-          set.status = 401
-          return 'Unauthorized'
-        }
+      async ({ set, profile, params: { id } }) => {
+        const { sub: userId } = profile
 
-        const [exist] = await db
-          .select()
-          .from(collections)
-          .where(eq(collections.id, id))
+        const exist = await db.query.collections.findFirst({
+          where: eq(collections.id, id),
+        })
 
         if (!exist) {
           set.status = 404
           return 'Not Found'
         }
 
-        if (exist && exist.userId !== profile.sub) {
+        if (exist && exist.userId !== userId) {
           set.status = 401
           return 'Unauthorized'
         }

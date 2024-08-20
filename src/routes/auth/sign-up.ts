@@ -8,9 +8,9 @@ export default (app: ElysiaApp) =>
   app.post(
     '',
     async ({ set, body }) => {
-      const exist = (
-        await db.select().from(users).where(eq(users.username, body.username))
-      ).at(0)
+      const exist = await db.query.users.findFirst({
+        where: eq(users.username, body.username),
+      })
 
       if (exist) {
         set.status = 409
