@@ -71,21 +71,18 @@ export default (app: ElysiaApp) =>
         return inserted
       },
       {
-        type: 'multipart/form-data',
         body: t.Composite([t.Pick(insertCollectionSchema, ['name'])]),
         response: {
           201: t.Object(
             {
               id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
-              name: t.Union([t.Null(), t.String({ default: 'name' })]),
-              userId: t.Union([
-                t.Null(),
-                t.String({ default: '00000000-0000-0000-0000-000000000000' }),
-              ]),
-              timestamp: t.Union([
-                t.Null(),
-                t.String({ default: '2000-01-01 00:00:00' }),
-              ]),
+              name: t.Union([t.Null(), t.String()], { default: 'name' }),
+              userId: t.Union([t.Null(), t.String()], {
+                default: '00000000-0000-0000-0000-000000000000',
+              }),
+              timestamp: t.Union([t.Null(), t.String()], {
+                default: '2000-01-01 00:00:00',
+              }),
             },
             {
               description: 'Created',

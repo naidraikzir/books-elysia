@@ -10,13 +10,13 @@ export default (app: ElysiaApp) =>
   app.post(
     '',
     async ({ params: { id }, body }) => {
-      const { books } = body
+      const { bookIds } = body
       const collection = await db
         .insert(collectionsOfBooks)
         .values(
-          books.map(book => ({
+          bookIds.map(bookId => ({
             collectionId: id,
-            bookId: book,
+            bookId,
           })),
         )
         .returning()
@@ -24,8 +24,15 @@ export default (app: ElysiaApp) =>
     },
     {
       body: t.Object({
-        books: t.Array(t.String()),
+        bookIds: t.Array(t.String()),
       }),
-      response: t.Array(selectCollectionOfBooksSchema),
+      response: t.Array(
+        t.Object({
+          collectionId: t.String({
+            default: '00000000-0000-0000-0000-000000000000',
+          }),
+          bookId: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+        }),
+      ),
     },
   )

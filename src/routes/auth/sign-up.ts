@@ -4,14 +4,6 @@ import { insertUserSchema, users } from '@/schemas/users.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
-const schema = {
-  body: t.Pick(insertUserSchema, ['username', 'password']),
-  response: {
-    201: t.Undefined({ description: 'Created' }),
-    409: t.String({ default: 'Conflict', description: 'Conflict' }),
-  },
-}
-
 export default (app: ElysiaApp) =>
   app.post(
     '',
@@ -32,5 +24,11 @@ export default (app: ElysiaApp) =>
       set.status = 201
       return
     },
-    schema,
+    {
+      body: t.Pick(insertUserSchema, ['username', 'password']),
+      response: {
+        201: t.String({ default: 'Created', description: 'Created' }),
+        409: t.String({ default: 'Conflict', description: 'Conflict' }),
+      },
+    },
   )

@@ -5,17 +5,6 @@ import { selectUserSchema, users } from '@/schemas/users.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
-const schema = {
-  body: t.Pick(selectUserSchema, ['username', 'password']),
-  response: {
-    200: t.Object({
-      accessToken: t.String({ default: 'abcdefghijklmnopqrstuvwxyz' }),
-    }),
-    401: t.String({ default: 'Unauthorized', description: 'Unauthorized' }),
-    404: t.String({ default: 'Not Found', description: 'Not Found' }),
-  },
-}
-
 export default (app: ElysiaApp) =>
   app.post(
     '',
@@ -54,5 +43,14 @@ export default (app: ElysiaApp) =>
         accessToken: accessToken.value as string,
       }
     },
-    schema,
+    {
+      body: t.Pick(selectUserSchema, ['username', 'password']),
+      response: {
+        200: t.Object({
+          accessToken: t.String({ default: 'abcdefghijklmnopqrstuvwxyz' }),
+        }),
+        401: t.String({ default: 'Unauthorized', description: 'Unauthorized' }),
+        404: t.String({ default: 'Not Found', description: 'Not Found' }),
+      },
+    },
   )

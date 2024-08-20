@@ -77,7 +77,6 @@ export default (app: ElysiaApp) =>
         return updated
       },
       {
-        type: 'multipart/form-data',
         params: t.Object({
           id: t.String(),
         }),
