@@ -3,7 +3,7 @@ import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { storeImage } from '@/lib/files'
 import { jwtHandler } from '@/middlewares/jwt'
-import { books, insertBookSchema } from '@/schemas/books.schema'
+import { books } from '@/schemas/books.schema'
 import { desc } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -36,7 +36,7 @@ export default (app: ElysiaApp) =>
               },
               {
                 default: {
-                  id: '00000000-0000-0000-0000-000000000000',
+                  id: 'abcdefghijklmn1234567890',
                   name: 'name',
                   author: 'author',
                   cover: 'cover.webp',
@@ -58,15 +58,18 @@ export default (app: ElysiaApp) =>
       '',
       async ({ set, body }) => {
         const { name, author, cover } = body
-        const id = crypto.randomUUID()
-        const coverFilename = await storeImage(cover as Blob)
+
+        let coverFilename = ''
+        if (cover) {
+          coverFilename = (await storeImage(cover as Blob)) as string
+        }
+
         const [inserted] = await db
           .insert(books)
           .values({
-            id,
             name,
             author,
-            cover: coverFilename,
+            ...(cover ? { cover: coverFilename } : {}),
           })
           .returning()
 
@@ -74,21 +77,20 @@ export default (app: ElysiaApp) =>
         return inserted
       },
       {
-        body: t.Composite([
-          t.Pick(insertBookSchema, ['name', 'author']),
-          t.Object({
-            cover: t.Optional(
-              t.File({
-                type: FILETYPES.image,
-                maxSize: MAX_FILESIZE,
-              }),
-            ),
-          }),
-        ]),
+        body: t.Object({
+          name: t.String(),
+          author: t.String(),
+          cover: t.Optional(
+            t.File({
+              type: FILETYPES.image,
+              maxSize: MAX_FILESIZE,
+            }),
+          ),
+        }),
         response: {
           201: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               author: t.Union([t.Null(), t.String()], { default: 'author' }),
               cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),

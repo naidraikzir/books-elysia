@@ -1,7 +1,7 @@
 import type { ElysiaApp } from '@/.'
 import { ACCESS_TOKEN_EXP } from '@/constants'
 import { db } from '@/db'
-import { selectUserSchema, users } from '@/schemas/users.schema'
+import { users } from '@/schemas/users.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -44,7 +44,10 @@ export default (app: ElysiaApp) =>
       }
     },
     {
-      body: t.Pick(selectUserSchema, ['username', 'password']),
+      body: t.Object({
+        username: t.String(),
+        password: t.String(),
+      }),
       response: {
         200: t.Object({
           accessToken: t.String({ default: 'abcdefghijklmnopqrstuvwxyz' }),

@@ -1,7 +1,6 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
 import { jwtHandler } from '@/middlewares/jwt'
-import { selectBookSchema } from '@/schemas/books.schema'
 import { collections } from '@/schemas/collections.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { eq } from 'drizzle-orm'
@@ -40,10 +39,10 @@ export default (app: ElysiaApp) =>
         response: {
           200: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               userId: t.Union([t.Null(), t.String()], {
-                default: '00000000-0000-0000-0000-000000000000',
+                default: 'abcdefghijklmn1234567890',
               }),
               timestamp: t.Union([t.Null(), t.String()], {
                 default: '2000-01-01 00:00:00',
@@ -53,14 +52,20 @@ export default (app: ElysiaApp) =>
                   {
                     collectionId: t.String(),
                     bookId: t.String(),
-                    book: selectBookSchema,
+                    book: t.Object({
+                      id: t.String(),
+                      name: t.Nullable(t.String()),
+                      author: t.Nullable(t.String()),
+                      cover: t.Nullable(t.String()),
+                      timestamp: t.Nullable(t.String()),
+                    }),
                   },
                   {
                     default: {
-                      collectionId: '00000000-0000-0000-0000-000000000000',
-                      bookId: '00000000-0000-0000-0000-000000000000',
+                      collectionId: 'abcdefghijklmn1234567890',
+                      bookId: 'abcdefghijklmn1234567890',
                       book: {
-                        id: '00000000-0000-0000-0000-000000000000',
+                        id: 'abcdefghijklmn1234567890',
                         name: 'name',
                         author: 'author',
                         cover: 'cover.webp',
@@ -103,10 +108,10 @@ export default (app: ElysiaApp) =>
         response: t.Array(
           t.Object({
             collectionId: t.String({
-              default: '00000000-0000-0000-0000-000000000000',
+              default: 'abcdefghijklmn1234567890',
             }),
             bookId: t.String({
-              default: '00000000-0000-0000-0000-000000000000',
+              default: 'abcdefghijklmn1234567890',
             }),
           }),
         ),

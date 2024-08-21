@@ -1,6 +1,6 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
-import { insertUserSchema, users } from '@/schemas/users.schema'
+import { users } from '@/schemas/users.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -17,15 +17,17 @@ export default (app: ElysiaApp) =>
         return 'User already exists'
       }
 
-      const id = crypto.randomUUID()
       const password = await Bun.password.hash(body.password)
 
-      await db.insert(users).values({ ...body, id, password })
+      await db.insert(users).values({ ...body, password })
       set.status = 201
-      return
+      return 'Created'
     },
     {
-      body: t.Pick(insertUserSchema, ['username', 'password']),
+      body: t.Object({
+        username: t.String(),
+        password: t.String(),
+      }),
       response: {
         201: t.String({ default: 'Created', description: 'Created' }),
         409: t.String({ default: 'Conflict', description: 'Conflict' }),

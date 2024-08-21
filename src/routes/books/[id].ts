@@ -3,7 +3,7 @@ import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { deleteImage, storeImage } from '@/lib/files'
 import { jwtHandler } from '@/middlewares/jwt'
-import { books, insertBookSchema } from '@/schemas/books.schema'
+import { books } from '@/schemas/books.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -31,7 +31,7 @@ export default (app: ElysiaApp) =>
         response: {
           200: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               author: t.Union([t.Null(), t.String()], { default: 'author' }),
               cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),
@@ -81,21 +81,20 @@ export default (app: ElysiaApp) =>
         params: t.Object({
           id: t.String(),
         }),
-        body: t.Composite([
-          t.Pick(insertBookSchema, ['name', 'author']),
-          t.Object({
-            cover: t.Optional(
-              t.File({
-                type: FILETYPES.image,
-                maxSize: MAX_FILESIZE,
-              }),
-            ),
-          }),
-        ]),
+        body: t.Object({
+          name: t.String(),
+          author: t.String(),
+          cover: t.Optional(
+            t.File({
+              type: FILETYPES.image,
+              maxSize: MAX_FILESIZE,
+            }),
+          ),
+        }),
         response: {
           200: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               author: t.Union([t.Null(), t.String()], { default: 'author' }),
               cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),
@@ -143,7 +142,7 @@ export default (app: ElysiaApp) =>
         response: {
           200: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               author: t.Union([t.Null(), t.String()], { default: 'author' }),
               cover: t.Union([t.Null(), t.String()], { default: 'cover.webp' }),

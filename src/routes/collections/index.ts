@@ -1,10 +1,7 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
 import { jwtHandler } from '@/middlewares/jwt'
-import {
-  collections,
-  insertCollectionSchema,
-} from '@/schemas/collections.schema'
+import { collections } from '@/schemas/collections.schema'
 import { desc, eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -36,9 +33,9 @@ export default (app: ElysiaApp) =>
               },
               {
                 default: {
-                  id: '00000000-0000-0000-0000-000000000000',
+                  id: 'abcdefghijklmn1234567890',
                   name: 'name',
-                  userId: '00000000-0000-0000-0000-000000000000',
+                  userId: 'abcdefghijklmn1234567890',
                   timestamp: '2000-01-01 00:00:00',
                 },
               },
@@ -57,11 +54,9 @@ export default (app: ElysiaApp) =>
       async ({ profile, set, body }) => {
         const { sub: userId } = profile
         const { name } = body
-        const id = crypto.randomUUID()
         const [inserted] = await db
           .insert(collections)
           .values({
-            id,
             name,
             userId,
           })
@@ -71,14 +66,16 @@ export default (app: ElysiaApp) =>
         return inserted
       },
       {
-        body: t.Composite([t.Pick(insertCollectionSchema, ['name'])]),
+        body: t.Object({
+          name: t.String(),
+        }),
         response: {
           201: t.Object(
             {
-              id: t.String({ default: '00000000-0000-0000-0000-000000000000' }),
+              id: t.String({ default: 'abcdefghijklmn1234567890' }),
               name: t.Union([t.Null(), t.String()], { default: 'name' }),
               userId: t.Union([t.Null(), t.String()], {
-                default: '00000000-0000-0000-0000-000000000000',
+                default: 'abcdefghijklmn1234567890',
               }),
               timestamp: t.Union([t.Null(), t.String()], {
                 default: '2000-01-01 00:00:00',
