@@ -2,6 +2,7 @@ import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
 import { jwtHandler } from '@/middlewares/jwt'
 import { collections } from '@/schemas/collections.schema'
+import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { and, eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -142,6 +143,12 @@ export default (app: ElysiaApp) =>
           .delete(collections)
           .where(eq(collections.id, id))
           .returning()
+
+        if (deleted) {
+          await db
+            .delete(collectionsOfBooks)
+            .where(eq(collectionsOfBooks.collectionId, deleted.id))
+        }
 
         return deleted
       },

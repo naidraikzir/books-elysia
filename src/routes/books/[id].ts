@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { deleteImage, storeImage } from '@/lib/files'
 import { jwtHandler } from '@/middlewares/jwt'
 import { books } from '@/schemas/books.schema'
+import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -133,6 +134,13 @@ export default (app: ElysiaApp) =>
           .returning()
 
         deleteImage(deleted?.cover)
+
+        if (deleted) {
+          await db
+            .delete(collectionsOfBooks)
+            .where(eq(collectionsOfBooks.bookId, deleted.id))
+        }
+
         return deleted
       },
       {

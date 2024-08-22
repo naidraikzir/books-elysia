@@ -113,8 +113,8 @@
           "tableTo": "collections",
           "columnsFrom": ["collection_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         },
         "collections_of_books_book_id_books_id_fk": {
           "name": "collections_of_books_book_id_books_id_fk",
@@ -122,8 +122,8 @@
           "tableTo": "books",
           "columnsFrom": ["book_id"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
