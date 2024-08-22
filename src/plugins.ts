@@ -16,7 +16,11 @@ export const plugins = new Elysia()
     }),
   )
   .use(bearer())
-  .use(staticPlugin())
+  .use(
+    staticPlugin({
+      prefix: '/',
+    }),
+  )
   .use(
     await autoload({
       schema: ({ path, url }) => {
