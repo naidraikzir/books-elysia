@@ -2,6 +2,7 @@ import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
 import { jwtHandler } from '@/middlewares/jwt'
 import { collections } from '@/schemas/collections.schema'
+import type { JWTPayloadSpec } from '@elysiajs/jwt'
 import { desc, eq } from 'drizzle-orm'
 import { t } from 'elysia'
 
@@ -12,15 +13,11 @@ export default (app: ElysiaApp) =>
 
     .get(
       '',
-      async ({ profile }) => {
-        const { sub: userId } = profile
-        const collectionList = await db.query.collections.findMany({
+      async ({ profile: { sub: userId } }: { profile: JWTPayloadSpec }) =>
+        await db.query.collections.findMany({
           where: eq(collections.userId, userId as string),
           orderBy: desc(collections.timestamp),
-        })
-
-        return collectionList
-      },
+        }),
       {
         response: {
           200: t.Array(

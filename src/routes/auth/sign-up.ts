@@ -18,8 +18,8 @@ export default (app: ElysiaApp) =>
       }
 
       const password = await Bun.password.hash(body.password)
-
       await db.insert(users).values({ ...body, password })
+
       set.status = 201
       return 'Created'
     },

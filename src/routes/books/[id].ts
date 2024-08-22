@@ -82,8 +82,8 @@ export default (app: ElysiaApp) =>
           id: t.String(),
         }),
         body: t.Object({
-          name: t.String(),
-          author: t.String(),
+          name: t.Optional(t.String()),
+          author: t.Optional(t.String()),
           cover: t.Optional(
             t.File({
               type: FILETYPES.image,

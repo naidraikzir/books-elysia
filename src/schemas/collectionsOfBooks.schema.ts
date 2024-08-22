@@ -8,10 +8,13 @@ export const collectionsOfBooks = sqliteTable(
   {
     collectionId: text('collection_id')
       .notNull()
-      .references(() => collections.id),
+      .references(() => collections.id, {
+        onUpdate: 'cascade',
+        onDelete: 'cascade',
+      }),
     bookId: text('book_id')
       .notNull()
-      .references(() => books.id),
+      .references(() => books.id, { onUpdate: 'cascade', onDelete: 'cascade' }),
   },
   t => ({
     pk: primaryKey({ columns: [t.collectionId, t.bookId] }),

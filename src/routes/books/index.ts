@@ -12,13 +12,10 @@ export default (app: ElysiaApp) =>
 
     .get(
       '',
-      async () => {
-        const bookList = await db.query.books.findMany({
+      async () =>
+        await db.query.books.findMany({
           orderBy: desc(books.timestamp),
-        })
-
-        return bookList
-      },
+        }),
       {
         query: t.Object({
           page: t.Optional(t.Integer()),
