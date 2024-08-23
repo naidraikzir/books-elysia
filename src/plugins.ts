@@ -1,3 +1,4 @@
+import { compression } from '@/lib/plugins/compression'
 import { bearer } from '@elysiajs/bearer'
 import { jwt } from '@elysiajs/jwt'
 import { staticPlugin } from '@elysiajs/static'
@@ -8,6 +9,7 @@ import { autoload } from 'elysia-autoload'
 if (!Bun.env.SECRET) throw new Error('SECRET not set!')
 
 export const plugins = new Elysia()
+  .use(compression)
   .use(
     jwt({
       name: 'jwt',
