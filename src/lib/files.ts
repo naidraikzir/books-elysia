@@ -14,7 +14,7 @@ export async function storeImage(file: Blob) {
 export async function deleteImage(filename: string | null) {
   if (!filename) return
   const cover = `${UPLOAD_DIR}/${filename}`
-  if (filename && (await Bun.file(cover).exists())) {
+  if (await Bun.file(cover).exists()) {
     unlink(`${UPLOAD_DIR}/${filename}`)
   }
 }

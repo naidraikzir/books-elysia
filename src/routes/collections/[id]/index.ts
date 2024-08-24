@@ -1,7 +1,7 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
 import { jwtHandler } from '@/middlewares/jwt'
-import { collections } from '@/schemas/collections.schema'
+import { type Collection, collections } from '@/schemas/collections.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { and, eq } from 'drizzle-orm'
 import { t } from 'elysia'
@@ -78,13 +78,14 @@ export default (app: ElysiaApp) =>
         }
 
         const { name } = body
-        const [updated] = await db
+        const updated = await db
           .update(collections)
           .set({
             name: name as string,
           })
           .where(eq(collections.id, id))
           .returning()
+          .get()
 
         return updated
       },
@@ -139,10 +140,11 @@ export default (app: ElysiaApp) =>
           return 'Unauthorized'
         }
 
-        const [deleted] = await db
+        const deleted = (await db
           .delete(collections)
           .where(eq(collections.id, id))
           .returning()
+          .get()) as Collection
 
         if (deleted) {
           await db

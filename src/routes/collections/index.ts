@@ -51,13 +51,14 @@ export default (app: ElysiaApp) =>
       async ({ profile, set, body }) => {
         const { sub: userId } = profile
         const { name } = body
-        const [inserted] = await db
+        const inserted = await db
           .insert(collections)
           .values({
             name,
             userId,
           })
           .returning()
+          .get()
 
         set.status = 201
         return inserted

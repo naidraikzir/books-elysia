@@ -61,7 +61,7 @@ export default (app: ElysiaApp) =>
           coverFilename = (await storeImage(cover as Blob)) as string
         }
 
-        const [inserted] = await db
+        const inserted = await db
           .insert(books)
           .values({
             name,
@@ -69,6 +69,7 @@ export default (app: ElysiaApp) =>
             ...(cover ? { cover: coverFilename } : {}),
           })
           .returning()
+          .get()
 
         set.status = 201
         return inserted

@@ -3,7 +3,7 @@ import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { deleteImage, storeImage } from '@/lib/files'
 import { jwtHandler } from '@/middlewares/jwt'
-import { books } from '@/schemas/books.schema'
+import { type Book, books } from '@/schemas/books.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { eq } from 'drizzle-orm'
 import { t } from 'elysia'
@@ -65,7 +65,7 @@ export default (app: ElysiaApp) =>
 
         const { name, author, cover } = body
         const coverFilename = await storeImage(cover as Blob)
-        const [updated] = await db
+        const updated = await db
           .update(books)
           .set({
             name: name as string,
@@ -74,6 +74,7 @@ export default (app: ElysiaApp) =>
           })
           .where(eq(books.id, id))
           .returning()
+          .get()
 
         deleteImage(exist?.cover)
         return updated
@@ -128,10 +129,11 @@ export default (app: ElysiaApp) =>
           return 'Not Found'
         }
 
-        const [deleted] = await db
+        const deleted = (await db
           .delete(books)
           .where(eq(books.id, id))
           .returning()
+          .get()) as Book
 
         deleteImage(deleted?.cover)
 
