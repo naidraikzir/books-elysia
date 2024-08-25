@@ -5,10 +5,12 @@ import { staticPlugin } from '@elysiajs/static'
 import { swagger } from '@elysiajs/swagger'
 import { Elysia } from 'elysia'
 import { autoload } from 'elysia-autoload'
+import { rateLimit } from 'elysia-rate-limit'
 
 if (!Bun.env.SECRET) throw new Error('SECRET not set!')
 
 export const plugins = new Elysia()
+  .use(rateLimit())
   .use(compression)
   .use(
     jwt({

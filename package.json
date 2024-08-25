@@ -1,6 +1,6 @@
 {
   "name": "books-elysia",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
@@ -22,6 +22,7 @@
     "drizzle-typebox": "^0.1.1",
     "elysia": "latest",
     "elysia-autoload": "^1.1.0",
+    "elysia-rate-limit": "^4.1.0",
     "sharp": "^0.33.4"
   },
   "devDependencies": {
