@@ -14,8 +14,8 @@ export default (app: ElysiaApp) =>
       })
 
       if (!user) {
-        set.status = 404
-        return 'No such user!'
+        set.status = 401
+        return 'Unauthorized'
       }
 
       const isPasswordMatched = await Bun.password.verify(
@@ -25,7 +25,7 @@ export default (app: ElysiaApp) =>
 
       if (!isPasswordMatched) {
         set.status = 401
-        return 'Wrong password buddy!'
+        return 'Unauthorized'
       }
 
       accessToken.set({
