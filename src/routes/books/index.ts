@@ -2,9 +2,9 @@ import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
 import { storeImage } from '@/lib/files'
+import { SortDir } from '@/lib/typeUtils'
 import { jwtHandler } from '@/middlewares/jwt'
-import { books } from '@/schemas/books.schema'
-import { desc } from 'drizzle-orm'
+import { books, booksSelect } from '@/schemas/books.schema'
 import { t } from 'elysia'
 
 export default (app: ElysiaApp) =>
@@ -12,14 +12,22 @@ export default (app: ElysiaApp) =>
 
     .get(
       '',
-      async () =>
+      async ({
+        query: { page, limit, sortBy = 'timestamp', sortDir = 'desc' },
+      }) =>
         await db.query.books.findMany({
-          orderBy: desc(books.timestamp),
+          orderBy: (books, dir) => [dir[sortDir](books[sortBy])],
+          limit,
+          offset: page && limit ? (page - 1) * limit : 0,
         }),
       {
         query: t.Object({
-          page: t.Optional(t.Integer()),
-          limit: t.Optional(t.Integer()),
+          page: t.Optional(t.Number()),
+          limit: t.Optional(t.Number()),
+          sortBy: t.Optional(
+            t.KeyOf(t.Pick(booksSelect, ['name', 'author', 'timestamp'])),
+          ),
+          sortDir: t.Optional(SortDir),
         }),
         response: {
           200: t.Array(

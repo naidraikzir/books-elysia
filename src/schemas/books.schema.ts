@@ -1,6 +1,7 @@
 import { createId } from '@paralleldrive/cuid2'
 import { relations, sql } from 'drizzle-orm'
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createSelectSchema } from 'drizzle-typebox'
 import { collectionsOfBooks } from './collectionsOfBooks.schema'
 
 export const books = sqliteTable('books', {
@@ -12,6 +13,7 @@ export const books = sqliteTable('books', {
 })
 
 export type Book = typeof books.$inferSelect
+export const booksSelect = createSelectSchema(books)
 
 export const booksRelations = relations(books, ({ many }) => ({
   collections: many(collectionsOfBooks),
