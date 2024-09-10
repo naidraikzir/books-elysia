@@ -1,6 +1,6 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
-import { jwtHandler } from '@/middlewares/jwt'
+import { jwtHandler } from '@/guards/jwt'
 import { collections } from '@/schemas/collections.schema'
 import type { JWTPayloadSpec } from '@elysiajs/jwt'
 import { desc, eq } from 'drizzle-orm'
@@ -41,7 +41,6 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          401: t.String({ default: 'Unauthorized' }),
         },
       },
     )
@@ -83,10 +82,6 @@ export default (app: ElysiaApp) =>
               description: 'Created',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
         },
       },
     )

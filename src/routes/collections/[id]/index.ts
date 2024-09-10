@@ -1,6 +1,6 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
-import { jwtHandler } from '@/middlewares/jwt'
+import { jwtHandler } from '@/guards/jwt'
 import { type Collection, collections } from '@/schemas/collections.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { and, eq } from 'drizzle-orm'
@@ -25,7 +25,7 @@ export default (app: ElysiaApp) =>
 
         if (!collection) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         return collection
@@ -50,7 +50,7 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )
@@ -69,12 +69,12 @@ export default (app: ElysiaApp) =>
 
         if (!exist) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         if (exist && exist.userId !== userId) {
           set.status = 401
-          return 'Unauthorized'
+          return
         }
 
         const { name } = body
@@ -112,11 +112,7 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )
@@ -132,12 +128,12 @@ export default (app: ElysiaApp) =>
 
         if (!exist) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         if (exist && exist.userId !== userId) {
           set.status = 401
-          return 'Unauthorized'
+          return
         }
 
         const deleted = (await db
@@ -174,11 +170,7 @@ export default (app: ElysiaApp) =>
               description: 'Deleted',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )

@@ -15,7 +15,7 @@ export default (app: ElysiaApp) =>
 
       if (!user) {
         set.status = 401
-        return 'Unauthorized'
+        return
       }
 
       const isPasswordMatched = await Bun.password.verify(
@@ -25,7 +25,7 @@ export default (app: ElysiaApp) =>
 
       if (!isPasswordMatched) {
         set.status = 401
-        return 'Unauthorized'
+        return
       }
 
       accessToken.set({
@@ -52,8 +52,7 @@ export default (app: ElysiaApp) =>
         200: t.Object({
           accessToken: t.String({ default: 'abcdefghijklmnopqrstuvwxyz' }),
         }),
-        401: t.String({ default: 'Unauthorized', description: 'Unauthorized' }),
-        404: t.String({ default: 'Not Found', description: 'Not Found' }),
+        401: t.Undefined({ description: 'Unauthorized' }),
       },
     },
   )

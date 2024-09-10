@@ -1,6 +1,6 @@
 import type { ElysiaApp } from '@/.'
 import { db } from '@/db'
-import { jwtHandler } from '@/middlewares/jwt'
+import { jwtHandler } from '@/guards/jwt'
 import { collections } from '@/schemas/collections.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { eq } from 'drizzle-orm'
@@ -27,7 +27,7 @@ export default (app: ElysiaApp) =>
 
         if (!collection) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         return collection
@@ -80,7 +80,7 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )

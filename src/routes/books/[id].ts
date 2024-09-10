@@ -1,8 +1,8 @@
 import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
+import { jwtHandler } from '@/guards/jwt'
 import { deleteImage, storeImage } from '@/lib/files'
-import { jwtHandler } from '@/middlewares/jwt'
 import { type Book, books } from '@/schemas/books.schema'
 import { collectionsOfBooks } from '@/schemas/collectionsOfBooks.schema'
 import { eq } from 'drizzle-orm'
@@ -20,7 +20,7 @@ export default (app: ElysiaApp) =>
 
         if (!book) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         return book
@@ -44,7 +44,7 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )
@@ -60,7 +60,7 @@ export default (app: ElysiaApp) =>
 
         if (!exist) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         const { name, author, cover } = body
@@ -108,11 +108,7 @@ export default (app: ElysiaApp) =>
               description: 'OK',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )
@@ -126,7 +122,7 @@ export default (app: ElysiaApp) =>
 
         if (!exist) {
           set.status = 404
-          return 'Not Found'
+          return
         }
 
         const deleted = (await db
@@ -164,11 +160,7 @@ export default (app: ElysiaApp) =>
               description: 'Deleted',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
-          404: t.String({ default: 'Not Found', description: 'Not Found' }),
+          404: t.Undefined({ description: 'Not Found' }),
         },
       },
     )

@@ -1,8 +1,8 @@
 import { compression } from '@/lib/plugins/compression'
-import { bearer } from '@elysiajs/bearer'
 import { jwt } from '@elysiajs/jwt'
 import { staticPlugin } from '@elysiajs/static'
 import { swagger } from '@elysiajs/swagger'
+import { logger } from '@tqman/nice-logger'
 import { Elysia } from 'elysia'
 import { autoload } from 'elysia-autoload'
 import { rateLimit } from 'elysia-rate-limit'
@@ -10,8 +10,13 @@ import { rateLimit } from 'elysia-rate-limit'
 if (!Bun.env.SECRET) throw new Error('SECRET not set!')
 
 export const plugins = new Elysia()
-  .use(rateLimit())
-  .use(compression)
+  .use(
+    rateLimit({
+      max: 30,
+    }),
+  )
+  .use(logger())
+  .use(compression())
   .use(
     jwt({
       name: 'jwt',
@@ -19,7 +24,6 @@ export const plugins = new Elysia()
       exp: '7d',
     }),
   )
-  .use(bearer())
   .use(
     staticPlugin({
       prefix: '/',
@@ -50,3 +54,10 @@ export const plugins = new Elysia()
       },
     }),
   )
+  .onError(({ code }) => {
+    if (code === 'NOT_FOUND') {
+      return new Response(null, {
+        status: 404,
+      })
+    }
+  })

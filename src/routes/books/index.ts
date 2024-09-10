@@ -1,9 +1,9 @@
 import type { ElysiaApp } from '@/.'
 import { FILETYPES, MAX_FILESIZE } from '@/constants'
 import { db } from '@/db'
+import { jwtHandler } from '@/guards/jwt'
 import { storeImage } from '@/lib/files'
 import { SortDir } from '@/lib/typeUtils'
-import { jwtHandler } from '@/middlewares/jwt'
 import { books, booksSelect } from '@/schemas/books.schema'
 import { t } from 'elysia'
 
@@ -13,7 +13,7 @@ export default (app: ElysiaApp) =>
     .get(
       '',
       async ({
-        query: { page, limit, sortBy = 'timestamp', sortDir = 'desc' },
+        query: { page, limit = 10, sortBy = 'timestamp', sortDir = 'desc' },
       }) =>
         await db.query.books.findMany({
           orderBy: (books, dir) => [dir[sortDir](books[sortBy])],
@@ -108,10 +108,6 @@ export default (app: ElysiaApp) =>
               description: 'Created',
             },
           ),
-          401: t.String({
-            default: 'Unauthorized',
-            description: 'Unauthorized',
-          }),
         },
       },
     )
