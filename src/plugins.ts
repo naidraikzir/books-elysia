@@ -54,10 +54,19 @@ export const plugins = new Elysia()
       },
     }),
   )
-  .onError(({ code }) => {
+  .onError(({ code, error }) => {
     if (code === 'NOT_FOUND') {
       return new Response(null, {
         status: 404,
+      })
+    }
+
+    if (code === 'VALIDATION') {
+      return new Response(JSON.stringify(error.all), {
+        status: 422,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
     }
   })
