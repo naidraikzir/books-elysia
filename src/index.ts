@@ -1,5 +1,5 @@
 import { plugins } from '@/plugins'
-import { Elysia, t } from 'elysia'
+import { Elysia } from 'elysia'
 
 const app = new Elysia().use(plugins).listen(Bun.env.PORT || 3000)
 
